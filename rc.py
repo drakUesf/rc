@@ -2,6 +2,7 @@ import numpy as np
 from scipy.integrate import solve_ivp
 from sklearn.linear_model import Ridge
 from scipy.integrate import odeint
+import matplotlib.pyplot as plt
 
 
 class time_delay_RC():
@@ -41,6 +42,8 @@ class time_delay_RC():
         u_min = 0.60
         u_max = 0.75
 
+        state = [0,0]
+
         for i in range(n_sample):
             print(f'timestep {i + 1}/{n_sample}', end='\r')
 
@@ -58,7 +61,6 @@ class time_delay_RC():
 
                 t_span = [t1, t1 + self.theta]
                 t_eval = np.linspace(t_span[0], t_span[1], 10) 
-                initial_state = [0, 0]
                 
                 #duffing equation
                 def duffing_oscillator(state, t):
@@ -70,16 +72,28 @@ class time_delay_RC():
                 #solution = solve_ivp(duffing_oscillator, t_span = t_span, y0 = initial_state, 
                                #t_eval = t_eval, method='RK45')
                 
-                solution = odeint(duffing_oscillator, initial_state, t_span, atol=1e-6, rtol=1e-6)
+                solution = odeint(duffing_oscillator, state, t_span, atol=1e-6, rtol=1e-6)
 
-                state = solution[-1][0]
+                state = solution[-1]
+
+                reservoir_state = state[0]
     
-                reservoir_states[i, j] = state  
+                reservoir_states[i, j] = reservoir_state
 
                 if i < n_sample - 1:
-                    feedback[j] = state 
+                    feedback[j] = reservoir_state
+        
+        plt.figure(figsize=(12, 6))
+        plt.plot(reservoir_states, label="Predicted Output", color='b')
+        plt.xlabel("Time")
+        plt.ylabel("Output")
+        plt.legend()
+        plt.grid(True)
+        plt.show() 
 
         return reservoir_states
+    
+        
     
 
     def trian(self, input, target):
