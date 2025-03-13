@@ -46,7 +46,7 @@ class time_delay_RC():
 
             t = time[i]
 
-            normalized_input = u_min + (u_max - u_min) * (input_signal + 1) / 2 #normalize the input
+            normalized_input = u_min + (u_max - u_min) * (input_data[i] + 1) / 2 #normalize the input
 
             for j in range(self.N):
 
