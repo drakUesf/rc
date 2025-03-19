@@ -5,23 +5,27 @@ from rc import model, reservoir
 from parity_benchmark import parity_function
 
 def parity_benchmark_test(n_sample, n_order):
+    
+    input = np.random.choice([-1, 1], size=(n_sample))
 
-    input_train = np.random.choice([0, 1], size=(int(0.75 * n_sample)))
-    input_test = np.random.choice([0, 1], size=(int(0.25 * n_sample)))
-
-    print(input_test)
+    train = int(0.75 * n_sample)
+    test = int(0.25 * n_sample)
+    
+    input_train = input[:train]
+    input_test = input[-test:]
 
     target_train = parity_function(input_train, n_order)
     target_test = parity_function(input_test, n_order)
 
-    train_model = model(input_train, target_train)
+    reservoir_states = reservoir(input)
 
-    reservoir_states_test = reservoir(input_test)
+    train_model = model(reservoir_states[50:] , target_train[(50-n_order+1):])
+
+    reservoir_states_test = reservoir_states[-test:]
 
     # Predict on test set
     predicted_output = np.sign(train_model.predict(reservoir_states_test[:len(target_test)]))
 
-    print(target_test)
 
     # Calculate success rate
     success_rate = np.mean(predicted_output == target_test)
@@ -41,8 +45,8 @@ def parity_benchmark_test(n_sample, n_order):
 
 if __name__ == '__main__':
 
-    n_sample = 4000
-    n_order = 4
+    n_sample = 500
+    n_order = 2
 
     parity_benchmark_test(n_sample, n_order)
 
